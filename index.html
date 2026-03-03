@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Serai AI 2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --c-cream:#F5EFE3;
+  --c-warm:#FAF7F2;
+  --c-sage:#7B9E82;
+  --c-sage-light:#A8BFA9;
+  --c-sage-bg:#8B9E8C;
+  --c-mauve-bg:#C8B4B4;
+  --c-lav:#9DA8C4;
+  --c-dark:#1C1C1A;
+  --c-charcoal:#2C2826;
+  --c-mid:#777;
+  --c-rose:#C4787A;
+}
+html,body{height:100%;overflow:hidden;background:var(--c-dark);}
+body{font-family:'Inter',sans-serif;color:var(--c-charcoal);}
+
+/* ── SCREEN SYSTEM ── */
+.screen{
+  position:fixed;inset:0;
+  opacity:0;pointer-events:none;
+  transition:opacity .7s cubic-bezier(.4,0,.2,1);
+}
+.screen.active{opacity:1;pointer-events:all;}
+
+/* ════════════════════════════════
+   SCREEN 1 · POEM
+════════════════════════════════ */
+#s-poem{
+  background:#111009;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:60px 40px;
+}
+.poem-logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:11px;letter-spacing:6px;
+  color:#444;text-transform:uppercase;
+  margin-bottom:72px;
+}
+.poem-body{text-align:center;max-width:460px;}
+.poem-line{
+  font-family:'Cormorant Garamond',serif;
+  font-size:30px;line-height:1.9;
+  color:#EDE9E0;font-style:italic;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .9s ease,transform .9s ease;
+}
+.poem-line.sm{font-size:17px;color:#555;}
+.poem-line.vis{opacity:1;transform:translateY(0);}
+.poem-begin{
+  margin-top:80px;opacity:0;
+  transition:opacity 1s ease;
+}
+.poem-begin.vis{opacity:1;}
+.btn-ghost{
+  background:none;border:1px solid #3A3A38;
+  color:#EDE9E0;padding:13px 44px;
+  font-family:'Inter',sans-serif;font-size:12px;
+  letter-spacing:2.5px;text-transform:uppercase;
+  cursor:pointer;transition:border-color .3s,background .3s;
+}
+.btn-ghost:hover{border-color:#888;background:rgba(255,255,255,.04);}
+
+/* ════════════════════════════════
+   SCREEN 2 · ONBOARDING QUESTIONS
+════════════════════════════════ */
+#s-questions{
+  background:var(--c-warm);
+  display:flex;align-items:center;justify-content:center;
+}
+.q-wrap{max-width:580px;width:100%;padding:50px 40px;}
+.q-step{display:none;animation:fadeUp .55s ease both;}
+.q-step.on{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+.q-count{font-size:11px;letter-spacing:2px;color:#AAA;text-transform:uppercase;margin-bottom:36px;}
+.q-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:38px;color:var(--c-charcoal);
+  font-style:italic;line-height:1.35;
+  margin-bottom:44px;
+}
+.q-opts{display:flex;flex-direction:column;gap:12px;}
+.q-opt{
+  display:flex;align-items:center;gap:18px;
+  padding:17px 22px;
+  border:1px solid #E4DED6;background:white;
+  cursor:pointer;transition:border-color .2s,background .2s;
+}
+.q-opt:hover,.q-opt.sel{border-color:var(--c-sage);background:#F4F8F5;}
+.q-opt-icon{font-size:22px;width:32px;flex-shrink:0;}
+.q-opt-main{}
+.q-opt-label{font-weight:500;font-size:15px;color:#333;}
+.q-opt-sub{font-size:12px;color:#AAA;margin-top:3px;}
+.btn-next{
+  margin-top:36px;background:var(--c-charcoal);
+  color:white;border:none;
+  padding:15px 40px;font-size:13px;
+  letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  transition:background .3s;
+}
+.btn-next:hover{background:#444;}
+
+/* ════════════════════════════════
+   SCREEN 3 · TREND CARDS REVEAL
+════════════════════════════════ */
+#s-cards{
+  background:#13120E;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.tc-header{
+  padding:32px 44px 24px;
+  display:flex;align-items:baseline;
+  justify-content:space-between;
+  flex-shrink:0;
+}
+.tc-greeting{
+  font-family:'Cormorant Garamond',serif;
+  font-size:13px;color:#666;letter-spacing:.5px;
+  display:block;margin-bottom:6px;
+}
+.tc-title{
+  font-family:'Playfair Display',serif;
+  font-size:30px;color:#EDE9E0;
+}
+.tc-time{
+  font-family:'Cormorant Garamond',serif;
+  font-size:34px;color:#555;font-style:italic;
+  line-height:1;
+}
+.tc-date{font-size:11px;color:#444;text-align:right;margin-top:4px;}
+
+/* Card rail */
+.tc-rail{
+  flex:1;padding:0 44px;
+  display:flex;align-items:center;gap:20px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.tc-rail::-webkit-scrollbar{display:none;}
+
+.t-card{
+  flex-shrink:0;width:240px;height:360px;
+  border-radius:18px;overflow:hidden;
+  cursor:pointer;position:relative;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+  animation:cardIn .6s ease both;
+}
+.t-card:hover{transform:translateY(-14px) rotate(-1.5deg);}
+.t-card:nth-child(even):hover{transform:translateY(-14px) rotate(1.5deg);}
+.t-card:nth-child(1){animation-delay:.08s;}
+.t-card:nth-child(2){animation-delay:.14s;}
+.t-card:nth-child(3){animation-delay:.20s;}
+.t-card:nth-child(4){animation-delay:.26s;}
+.t-card:nth-child(5){animation-delay:.32s;}
+.t-card:nth-child(6){animation-delay:.38s;}
+.t-card:nth-child(7){animation-delay:.44s;}
+.t-card:nth-child(8){animation-delay:.50s;}
+.t-card:nth-child(9){animation-delay:.56s;}
+.t-card:nth-child(10){animation-delay:.62s;}
+@keyframes cardIn{
+  from{opacity:0;transform:translateY(50px) scale(.94);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+.t-card-face{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;
+}
+.t-card-art{
+  flex:1;display:flex;align-items:center;
+  justify-content:center;position:relative;overflow:hidden;
+}
+.t-card-info{
+  padding:18px 16px;
+  background:linear-gradient(transparent,rgba(0,0,0,.72));
+}
+.t-card-num{
+  font-size:10px;letter-spacing:2px;
+  color:rgba(255,255,255,.45);
+  text-transform:uppercase;margin-bottom:6px;
+}
+.t-card-name{
+  font-family:'Playfair Display',serif;
+  font-size:20px;color:white;line-height:1.15;
+  margin-bottom:5px;
+}
+.t-card-tag{
+  font-size:11px;color:rgba(255,255,255,.55);
+  line-height:1.45;
+}
+
+/* Card colour palettes */
+.pal-01{background:linear-gradient(155deg,#7B9E6A 0%,#4A6E42 55%,#2C4828 100%);}
+.pal-02{background:linear-gradient(155deg,#9C8474,#6A5448,#3C2C24);}
+.pal-03{background:linear-gradient(155deg,#7A90B0,#4E6888,#283850);}
+.pal-04{background:linear-gradient(155deg,#C4B4A4,#9A8470,#5C4C42);}
+.pal-05{background:linear-gradient(155deg,#A87888,#784858,#441828);}
+.pal-06{background:linear-gradient(155deg,#9C7C54,#6A5038,#3C2818);}
+.pal-07{background:linear-gradient(155deg,#D0A458,#9A6E28,#5A3A08);}
+.pal-08{background:linear-gradient(155deg,#4C3C60,#281E3C,#100818);}
+.pal-09{background:linear-gradient(155deg,#7A8A72,#50604A,#2C3828);}
+.pal-10{background:linear-gradient(155deg,#B8B4C8,#7E7A94,#3C3850);}
+
+/* Card art glyphs */
+.glyph{
+  font-size:80px;opacity:.35;
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  filter:blur(1px);
+}
+.glyph-line{
+  position:absolute;
+  border-top:1px solid rgba(255,255,255,.12);
+  width:70%;
+}
+.glyph-line:nth-child(2){top:35%;}
+.glyph-line:nth-child(3){top:55%;}
+.card-word{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;font-size:15px;
+  color:rgba(255,255,255,.4);letter-spacing:1px;
+  position:absolute;bottom:70px;left:16px;
+}
+
+/* Nav dots */
+.tc-dots{
+  padding:18px 44px 28px;
+  display:flex;gap:7px;align-items:center;
+  flex-shrink:0;
+}
+.tc-dot{
+  width:5px;height:5px;
+  border-radius:50%;background:#333;
+  transition:all .3s;cursor:pointer;
+}
+.tc-dot.on{background:#EDE9E0;width:22px;border-radius:3px;}
+
+/* ════════════════════════════════
+   SHARED SIDEBAR
+════════════════════════════════ */
+.sidebar{
+  width:112px;flex-shrink:0;
+  background:white;
+  border-right:1px solid #EDE8E0;
+  display:flex;flex-direction:column;
+  padding:18px 0;overflow:hidden;
+}
+.sb-logo{
+  width:26px;height:26px;
+  background:linear-gradient(135deg,#E8A878,#C45A30);
+  border-radius:6px;margin:0 12px 18px;flex-shrink:0;
+}
+.sb-section{
+  font-size:9.5px;letter-spacing:1.5px;color:#BBB;
+  text-transform:uppercase;padding:0 12px;
+  margin-bottom:8px;
+}
+.sb-item{
+  padding:8px 12px;font-size:12px;
+  color:#666;cursor:pointer;
+  white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;
+  transition:background .18s;
+}
+.sb-item:hover,.sb-item.on{
+  background:#F5F0EC;color:var(--c-charcoal);
+}
+.sb-add{
+  margin:12px;border:1px dashed #DDD;
+  border-radius:5px;padding:9px;
+  text-align:center;font-size:20px;
+  color:#CCC;cursor:pointer;
+  transition:all .2s;flex-shrink:0;
+}
+.sb-add:hover{border-color:#999;color:#888;}
+.sb-thumbs{
+  flex:1;overflow-y:auto;padding:8px;
+  display:flex;flex-direction:column;gap:8px;
+  scrollbar-width:none;
+}
+.sb-thumbs::-webkit-scrollbar{display:none;}
+.sb-thumb{
+  width:88px;height:88px;border-radius:9px;
+  overflow:hidden;cursor:pointer;
+  flex-shrink:0;border:2px solid transparent;
+  transition:transform .2s,border-color .2s;
+}
+.sb-thumb:hover{transform:scale(1.04);}
+.sb-thumb.sel{border-color:var(--c-sage);}
+.thumb-fill{
+  width:100%;height:100%;
+  display:flex;align-items:center;
+  justify-content:center;font-size:26px;
+}
+
+/* ════════════════════════════════
+   SCREEN 4 · MOODBOARD BROWSE
+════════════════════════════════ */
+#s-main{display:flex;background:var(--c-mauve-bg);}
+.main-col{
+  flex:1;display:flex;
+  flex-direction:column;overflow:hidden;
+}
+.main-hdr{
+  padding:22px 28px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.main-hdr-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:17px;color:#3C2C2C;font-style:italic;
+}
+.main-hdr-meta{font-size:11px;color:#A08080;}
+
+/* Masonry */
+.grid{
+  flex:1;overflow-y:auto;
+  padding:0 28px 16px;
+  columns:4;column-gap:12px;
+  scrollbar-width:thin;
+}
+.m-card{
+  break-inside:avoid;margin-bottom:12px;
+  border-radius:11px;overflow:hidden;
+  cursor:pointer;position:relative;
+  transition:transform .25s,box-shadow .25s;
+}
+.m-card:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(0,0,0,.22);}
+.m-card-art{
+  display:flex;align-items:center;
+  justify-content:center;overflow:hidden;
+}
+.m-card-ovl{
+  position:absolute;inset:0;
+  background:linear-gradient(transparent 55%,rgba(0,0,0,.6));
+  opacity:0;transition:opacity .3s;
+  display:flex;align-items:flex-end;
+  padding:12px;
+}
+.m-card:hover .m-card-ovl{opacity:1;}
+.m-card-ovl-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:13px;color:white;
+  font-style:italic;
+}
+
+/* Bottom toolbar */
+.toolbar{
+  padding:14px 28px;
+  display:flex;align-items:center;gap:16px;
+  border-top:1px solid rgba(0,0,0,.08);
+  background:rgba(200,180,180,.45);
+  flex-shrink:0;
+}
+.tb-btn{
+  width:34px;height:34px;border-radius:50%;
+  border:none;cursor:pointer;
+  background:rgba(255,255,255,.65);
+  display:flex;align-items:center;
+  justify-content:center;font-size:15px;
+  transition:transform .2s,background .2s;
+}
+.tb-btn:hover{background:rgba(255,255,255,.9);transform:scale(1.12);}
+.color-wheel{
+  width:30px;height:30px;border-radius:50%;
+  background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);
+  cursor:pointer;border:2px solid white;flex-shrink:0;
+}
+
+/* ════════════════════════════════
+   SCREEN 5 · CARD DETAIL
+════════════════════════════════ */
+#s-detail{display:flex;background:var(--c-sage-bg);}
+.detail-body{
+  flex:1;display:flex;
+  align-items:center;justify-content:center;
+  padding:36px;gap:44px;
+  overflow:hidden;
+}
+.detail-frame{
+  background:#F5EFE0;
+  border-radius:22px;padding:28px;
+  width:360px;flex-shrink:0;
+  box-shadow:0 22px 64px rgba(0,0,0,.22);
+}
+.detail-inner{
+  background:white;border-radius:12px;
+  padding:28px;min-height:300px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:20px;
+}
+.granary-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:18px;width:100%;
+}
+.granary-cell{
+  text-align:center;
+}
+.granary-cell .gi{font-size:34px;margin-bottom:6px;}
+.granary-cell .gl{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;font-size:9px;
+  color:#AAA;line-height:1.5;
+}
+.granary-sig{
+  font-size:8px;color:#DDD;
+  align-self:flex-end;
+  font-style:italic;
+}
+
+.detail-right{
+  flex:1;max-width:480px;
+  display:flex;flex-direction:column;
+  justify-content:center;
+}
+.detail-title{
+  font-family:'Playfair Display',serif;
+  font-size:50px;color:var(--c-charcoal);
+  line-height:1.08;margin-bottom:28px;
+}
+.note-box{
+  background:#FAF5EE;border-radius:14px;
+  padding:20px 22px;border:2px solid transparent;
+  transition:border-color .3s;
+}
+.note-box:focus-within{border-color:#C4A8A0;}
+.note-area{
+  width:100%;min-height:180px;
+  border:none;background:none;
+  font-family:'Inter',sans-serif;font-size:15px;
+  color:#444;resize:none;outline:none;
+  line-height:1.75;
+}
+.note-area::placeholder{color:#CCC;}
+.voice-row{
+  display:flex;align-items:center;gap:10px;
+  margin-top:10px;color:#CCC;font-size:13px;
+}
+.wave{display:flex;align-items:center;gap:2px;}
+.wb{
+  width:2px;background:#C4A8A0;
+  border-radius:1px;
+  animation:wb 1s ease-in-out infinite;
+}
+.wb:nth-child(1){height:7px;animation-delay:0s;}
+.wb:nth-child(2){height:13px;animation-delay:.1s;}
+.wb:nth-child(3){height:9px;animation-delay:.2s;}
+.wb:nth-child(4){height:17px;animation-delay:.3s;}
+.wb:nth-child(5){height:11px;animation-delay:.4s;}
+.wb:nth-child(6){height:15px;animation-delay:.5s;}
+.wb:nth-child(7){height:7px;animation-delay:.6s;}
+.wb:nth-child(8){height:12px;animation-delay:.7s;}
+@keyframes wb{
+  0%,100%{transform:scaleY(.45);opacity:.45;}
+  50%{transform:scaleY(1);opacity:1;}
+}
+.detail-toolbar{
+  display:flex;align-items:center;
+  gap:14px;margin-top:22px;
+}
+.btn-update{
+  margin-left:auto;
+  background:#9B6B6B;color:white;
+  border:none;padding:13px 30px;
+  font-size:14px;font-family:'Inter',sans-serif;
+  border-radius:8px;cursor:pointer;
+  transition:background .3s;
+}
+.btn-update:hover{background:#7A4A4A;}
+
+/* ════════════════════════════════
+   SCREEN 6 · SEARCH + SKETCH
+════════════════════════════════ */
+#s-search{display:flex;background:var(--c-lav);}
+.srch-left{
+  flex:1;display:flex;
+  align-items:center;justify-content:center;
+  padding:36px;
+}
+.srch-card-wrap{
+  display:flex;gap:40px;align-items:flex-start;
+  max-width:860px;width:100%;
+}
+.srch-frame{
+  background:#F0EBE0;border-radius:18px;
+  padding:22px;width:300px;flex-shrink:0;
+  box-shadow:0 18px 56px rgba(0,0,0,.2);
+}
+.srch-inner{
+  background:white;border-radius:10px;
+  padding:22px;min-height:240px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:14px;
+}
+.srch-granary-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;
+}
+.srch-cell{text-align:center;}
+.srch-cell .si{font-size:26px;margin-bottom:5px;}
+.srch-cell .sl{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:8px;color:#AAA;line-height:1.5;}
+
+.srch-content{flex:1;display:flex;flex-direction:column;}
+.srch-name{
+  font-family:'Playfair Display',serif;
+  font-size:38px;color:var(--c-charcoal);
+  margin-bottom:18px;line-height:1.1;
+}
+.srch-body{
+  font-size:16px;line-height:1.85;
+  color:#444;margin-bottom:20px;
+  font-family:'Cormorant Garamond',serif;font-size:18px;
+}
+.hl{
+  color:var(--c-rose);cursor:pointer;
+  border-bottom:1px solid transparent;
+  transition:border-color .2s;
+}
+.hl:hover{border-bottom-color:var(--c-rose);}
+.sketch-row{display:flex;gap:10px;margin-bottom:20px;}
+.sk-thumb{
+  width:100px;height:110px;border-radius:9px;
+  overflow:hidden;cursor:pointer;
+  border:2px solid transparent;
+  transition:border-color .25s,transform .25s;
+}
+.sk-thumb:hover{border-color:#C4A0A0;transform:translateY(-3px);}
+.sk-fill{
+  width:100%;height:100%;
+  display:flex;align-items:center;
+  justify-content:center;font-size:28px;
+}
+.srch-bar-row{display:flex;align-items:center;gap:12px;}
+
+/* Right panel */
+.srch-panel{
+  width:400px;flex-shrink:0;
+  background:#2E2820;
+  display:flex;flex-direction:column;
+  padding:26px;overflow:hidden;
+}
+.srch-input-wrap{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.08);
+  border-radius:28px;padding:11px 18px;
+  margin-bottom:20px;flex-shrink:0;
+}
+.srch-icon{color:#888;font-size:14px;}
+.srch-input{
+  background:none;border:none;
+  color:white;font-size:16px;outline:none;
+  flex:1;font-family:'Inter',sans-serif;
+}
+.srch-input::placeholder{color:#555;}
+.srch-results{
+  flex:1;overflow-y:auto;
+  display:flex;flex-direction:column;gap:10px;
+  scrollbar-width:thin;scrollbar-color:#333 transparent;
+}
+.r-card{
+  background:rgba(255,255,255,.05);
+  border-radius:11px;padding:13px;
+  display:flex;gap:12px;cursor:pointer;
+  border:1px solid transparent;
+  transition:background .2s,border-color .2s;
+}
+.r-card:hover,.r-card.on{
+  background:rgba(255,255,255,.1);
+  border-color:rgba(255,255,255,.12);
+}
+.r-thumb{
+  width:68px;height:68px;border-radius:7px;
+  overflow:hidden;flex-shrink:0;background:#444;
+}
+.r-fill{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.r-title{font-size:13px;font-weight:500;color:#EEE;margin-bottom:5px;line-height:1.3;}
+.r-desc{font-size:11.5px;color:#777;line-height:1.55;}
+.ctx-menu{
+  background:#221E18;border-radius:11px;
+  overflow:hidden;margin-top:10px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);
+}
+.ctx-row{
+  padding:11px 16px;font-size:13px;
+  color:#CCC;cursor:pointer;
+  display:flex;align-items:center;
+  justify-content:space-between;
+  transition:background .18s;
+}
+.ctx-row:hover{background:rgba(255,255,255,.07);}
+.ctx-sub{background:#1A1610;border-left:1px solid #333;}
+.ctx-sub .ctx-row{padding-left:22px;font-size:12.5px;color:#BBB;}
+.ctx-sub .ctx-row.on{background:rgba(255,255,255,.09);color:white;}
+
+/* ════════════════════════════════
+   GLOBAL NAV PILLS
+════════════════════════════════ */
+.nav-pills{
+  position:fixed;bottom:26px;left:50%;
+  transform:translateX(-50%);
+  display:flex;gap:7px;z-index:999;
+  transition:opacity .3s;
+}
+.nav-pill{
+  width:7px;height:7px;border-radius:50%;
+  background:rgba(255,255,255,.25);cursor:pointer;
+  transition:all .3s;
+}
+.nav-pill.on{background:rgba(255,255,255,.85);width:22px;border-radius:4px;}
+.nav-label{
+  position:fixed;bottom:52px;left:50%;
+  transform:translateX(-50%);
+  font-size:10px;letter-spacing:2px;
+  color:rgba(255,255,255,.3);text-transform:uppercase;
+  z-index:999;pointer-events:none;
+  transition:opacity .4s;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     S1 · POEM LANDING
+══════════════════════════════ -->
+<div id="s-poem" class="screen active">
+  <div class="poem-logo">Serai AI &nbsp;·&nbsp; 2.0</div>
+  <div class="poem-body">
+    <p class="poem-line" data-d="300">Close your eyes.</p>
+    <p class="poem-line sm" data-d="1100">What colour is your morning?</p>
+    <p class="poem-line" data-d="2200">Touch the shape</p>
+    <p class="poem-line" data-d="3000">of what you feel—</p>
+    <p class="poem-line sm" data-d="4100">before the world tells you what to feel.</p>
+    <p class="poem-line" data-d="5600">Your intuition</p>
+    <p class="poem-line" data-d="6400">is the collection.</p>
+  </div>
+  <div class="poem-begin" id="poem-begin">
+    <button class="btn-ghost" onclick="go('s-questions')">Begin</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     S2 · ONBOARDING QUESTIONS
+══════════════════════════════ -->
+<div id="s-questions" class="screen">
+  <div class="q-wrap">
+
+    <!-- Q1 -->
+    <div class="q-step on" id="q1">
+      <div class="q-count">01 &nbsp;/&nbsp; 03</div>
+      <h2 class="q-title">What kind of inspiration<br>are you searching for?</h2>
+      <div class="q-opts">
+        <div class="q-opt" onclick="pick(this,'q1')">
+          <div class="q-opt-icon">🌿</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Organic &amp; Elemental</div>
+            <div class="q-opt-sub">Nature, texture, the material world</div>
+          </div>
+        </div>
+        <div class="q-opt" onclick="pick(this,'q1')">
+          <div class="q-opt-icon">🌆</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Cultural &amp; Urban</div>
+            <div class="q-opt-sub">Streets, subcultures, zeitgeist</div>
+          </div>
+        </div>
+        <div class="q-opt" onclick="pick(this,'q1')">
+          <div class="q-opt-icon">🎭</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Archival &amp; Historical</div>
+            <div class="q-opt-sub">Memory, heritage, the past reimagined</div>
+          </div>
+        </div>
+        <div class="q-opt" onclick="pick(this,'q1')">
+          <div class="q-opt-icon">✦</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Conceptual &amp; Abstract</div>
+            <div class="q-opt-sub">Ideas, emotions, the intangible</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-next" onclick="nextQ(2)">Next →</button>
+    </div>
+
+    <!-- Q2 -->
+    <div class="q-step" id="q2">
+      <div class="q-count">02 &nbsp;/&nbsp; 03</div>
+      <h2 class="q-title">Where are you in<br>your creative process?</h2>
+      <div class="q-opts">
+        <div class="q-opt" onclick="pick(this,'q2')">
+          <div class="q-opt-icon">🌱</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Seeds — Beginning</div>
+            <div class="q-opt-sub">Searching, not yet knowing</div>
+          </div>
+        </div>
+        <div class="q-opt" onclick="pick(this,'q2')">
+          <div class="q-opt-icon">🌿</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Roots — Researching</div>
+            <div class="q-opt-sub">Building the foundation</div>
+          </div>
+        </div>
+        <div class="q-opt" onclick="pick(this,'q2')">
+          <div class="q-opt-icon">🌸</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Bloom — Creating</div>
+            <div class="q-opt-sub">Sketching, making, building</div>
+          </div>
+        </div>
+        <div class="q-opt" onclick="pick(this,'q2')">
+          <div class="q-opt-icon">🍂</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Harvest — Refining</div>
+            <div class="q-opt-sub">Editing, finalising, presenting</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-next" onclick="nextQ(3)">Next →</button>
+    </div>
+
+    <!-- Q3 -->
+    <div class="q-step" id="q3">
+      <div class="q-count">03 &nbsp;/&nbsp; 03</div>
+      <h2 class="q-title">What is your practice?</h2>
+      <div class="q-opts">
+        <div class="q-opt" onclick="pick(this,'q3')">
+          <div class="q-opt-icon">👗</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Fashion Design</div>
+            <div class="q-opt-sub">Garments, collections, styling</div>
+          </div>
+        </div>
+        <div class="q-opt" onclick="pick(this,'q3')">
+          <div class="q-opt-icon">🖼</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Visual Art &amp; Direction</div>
+            <div class="q-opt-sub">Photography, curation, editorial</div>
+          </div>
+        </div>
+        <div class="q-opt" onclick="pick(this,'q3')">
+          <div class="q-opt-icon">✏️</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Illustration &amp; Craft</div>
+            <div class="q-opt-sub">Drawing, making, hand-work</div>
+          </div>
+        </div>
+        <div class="q-opt" onclick="pick(this,'q3')">
+          <div class="q-opt-icon">◈</div>
+          <div class="q-opt-main">
+            <div class="q-opt-label">Research &amp; Strategy</div>
+            <div class="q-opt-sub">Trend forecasting, brand identity</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-next" onclick="go('s-cards')">Enter Serai →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     S3 · TREND CARDS (TAROT REVEAL)
+══════════════════════════════ -->
+<div id="s-cards" class="screen">
+  <div class="tc-header">
+    <div>
+      <span class="tc-greeting">Good morning, Tuesday</span>
+      <div class="tc-title">Today's 10 Signals</div>
+    </div>
+    <div>
+      <div class="tc-time">06:00</div>
+      <div class="tc-date">March 3 · 2026</div>
+    </div>
+  </div>
+
+  <div class="tc-rail" id="tc-rail">
+
+    <div class="t-card pal-01" onclick="go('s-main')">
+      <div class="t-card-face">
+        <div class="t-card-art">
+          <div class="glyph">✦</div>
+          <div class="glyph-line"></div><div class="glyph-line"></div>
+          <div class="card-word">orchid · rhythm</div>
+        </div>
+        <div class="t-card-info">
+          <div class="t-card-num">Signal 01</div>
+          <div class="t-card-name">Orchid Rhythm</div>
+          <div class="t-card-tag">Botanical excess meets structural restraint</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-card pal-02" onclick="go('s-main')">
+      <div class="t-card-face">
+        <div class="t-card-art">
+          <div class="glyph">⬡</div>
+          <div class="glyph-line"></div><div class="glyph-line"></div>
+        </div>
+        <div class="t-card-info">
+          <div class="t-card-num">Signal 02</div>
+          <div class="t-card-name">Urban Decay</div>
+          <div class="t-card-tag">Industrial texture becomes luxury surface</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-card pal-03" onclick="go('s-main')">
+      <div class="t-card-face">
+        <div class="t-card-art">
+          <div class="glyph">〰</div>
+          <div class="glyph-line"></div><div class="glyph-line"></div>
+          <div class="card-word">fluid · memory</div>
+        </div>
+        <div class="t-card-info">
+          <div class="t-card-num">Signal 03</div>
+          <div class="t-card-name">Fluid Memory</div>
+          <div class="t-card-tag">Liquid drape as emotional archive</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-card pal-04" onclick="go('s-main')">
+      <div class="t-card-face">
+        <div class="t-card-art">
+          <div class="glyph">◻</div>
+          <div class="glyph-line"></div><div class="glyph-line"></div>
+        </div>
+        <div class="t-card-info">
+          <div class="t-card-num">Signal 04</div>
+          <div class="t-card-name">Quiet Luxury</div>
+          <div class="t-card-tag">Restraint as the ultimate statement</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-card pal-05" onclick="go('s-main')">
+      <div class="t-card-face">
+        <div class="t-card-art">
+          <div class="glyph">⌘</div>
+          <div class="glyph-line"></div><div class="glyph-line"></div>
+          <div class="card-word">digital · folk</div>
+        </div>
+        <div class="t-card-info">
+          <div class="t-card-num">Signal 05</div>
+          <div class="t-card-name">Digital Folk</div>
+          <div class="t-card-tag">Handcraft vocabulary in a digital age</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-card pal-06" onclick="go('s-main')">
+      <div class="t-card-face">
+        <div class="t-card-art">
+          <div class="glyph">⌇</div>
+          <div class="glyph-line"></div><div class="glyph-line"></div>
+        </div>
+        <div class="t-card-info">
+          <div class="t-card-num">Signal 06</div>
+          <div class="t-card-name">Raw Edge</div>
+          <div class="t-card-tag">Unfinished as intentional gesture</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-card pal-07" onclick="go('s-main')">
+      <div class="t-card-face">
+        <div class="t-card-art">
+          <div class="glyph">☀</div>
+          <div class="glyph-line"></div><div class="glyph-line"></div>
+          <div class="card-word">solar · bloom</div>
+        </div>
+        <div class="t-card-info">
+          <div class="t-card-num">Signal 07</div>
+          <div class="t-card-name">Solar Bloom</div>
+          <div class="t-card-tag">Warm tones, organic emergence</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-card pal-08" onclick="go('s-main')">
+      <div class="t-card-face">
+        <div class="t-card-art">
+          <div class="glyph">☽</div>
+          <div class="glyph-line"></div><div class="glyph-line"></div>
+        </div>
+        <div class="t-card-info">
+          <div class="t-card-num">Signal 08</div>
+          <div class="t-card-name">Night Market</div>
+          <div class="t-card-tag">Dark florals and street mythology</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-card pal-09" onclick="go('s-main')">
+      <div class="t-card-face">
+        <div class="t-card-art">
+          <div class="glyph">◎</div>
+          <div class="glyph-line"></div><div class="glyph-line"></div>
+          <div class="card-word">archive · pull</div>
+        </div>
+        <div class="t-card-info">
+          <div class="t-card-num">Signal 09</div>
+          <div class="t-card-name">Archive Pull</div>
+          <div class="t-card-tag">Vintage reconstruction as new canon</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="t-card pal-10" onclick="go('s-main')">
+      <div class="t-card-face">
+        <div class="t-card-art">
+          <div class="glyph">◌</div>
+          <div class="glyph-line"></div><div class="glyph-line"></div>
+        </div>
+        <div class="t-card-info">
+          <div class="t-card-num">Signal 10</div>
+          <div class="t-card-name">Ghost Layer</div>
+          <div class="t-card-tag">Transparency, presence, disappearance</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tc-dots" id="tc-dots">
+    <div class="tc-dot on"></div>
+    <div class="tc-dot"></div>
+    <div class="tc-dot"></div>
+    <div class="tc-dot"></div>
+    <div class="tc-dot"></div>
+    <div class="tc-dot"></div>
+    <div class="tc-dot"></div>
+    <div class="tc-dot"></div>
+    <div class="tc-dot"></div>
+    <div class="tc-dot"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     S4 · MOODBOARD BROWSE
+══════════════════════════════ -->
+<div id="s-main" class="screen">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sb-logo"></div>
+    <div class="sb-section">Collections</div>
+    <div class="sb-item on">Inspo</div>
+    <div class="sb-item">Collection AW</div>
+    <div class="sb-item">Collection SS</div>
+    <div class="sb-item">Accessories</div>
+    <div class="sb-add">+</div>
+    <div class="sb-thumbs">
+      <div class="sb-thumb sel" onclick="go('s-detail')"><div class="thumb-fill" style="background:linear-gradient(135deg,#9E8AAE,#C4A8C8);">🌸</div></div>
+      <div class="sb-thumb" onclick="go('s-detail')"><div class="thumb-fill" style="background:linear-gradient(135deg,#E8D870,#E0A030);">⚡</div></div>
+      <div class="sb-thumb" onclick="go('s-detail')"><div class="thumb-fill" style="background:linear-gradient(135deg,#A8C0A0,#608060);">🌿</div></div>
+      <div class="sb-thumb" onclick="go('s-detail')"><div class="thumb-fill" style="background:linear-gradient(135deg,#E0C0C0,#A88080);">💎</div></div>
+      <div class="sb-thumb" onclick="go('s-detail')"><div class="thumb-fill" style="background:linear-gradient(135deg,#C04040,#800010);">🍎</div></div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main-col">
+    <div class="main-hdr">
+      <div class="main-hdr-title">Today's Inspos</div>
+      <div class="main-hdr-meta">March 3 &nbsp;·&nbsp; 06:00 &nbsp;·&nbsp; 10 signals</div>
+    </div>
+
+    <div class="grid">
+      <!-- col 1 -->
+      <div class="m-card" onclick="go('s-detail')" style="height:195px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#EED5C0,#C8A880);font-size:50px;filter:blur(0);">🌺</div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Orchid Rhythm</div></div>
+      </div>
+      <div class="m-card" onclick="go('s-detail')" style="height:155px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#D8E8D0,#88B080);font-size:40px;">🌿</div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Raw Edge</div></div>
+      </div>
+      <div class="m-card" onclick="go('s-detail')" style="height:240px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#281828,#180010);align-items:center;justify-content:center;display:flex;">
+          <div style="text-align:center;color:white;padding:22px;">
+            <div style="font-family:'Playfair Display',serif;font-size:20px;font-style:italic;line-height:1.4;">COLLECTION<br><span style="font-size:10px;letter-spacing:3px;font-family:'Inter',sans-serif;">A JOB IN<br>FASHION</span></div>
+          </div>
+        </div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Night Market</div></div>
+      </div>
+
+      <!-- col 2 -->
+      <div class="m-card" onclick="go('s-detail')" style="height:290px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#4A6E5E,#2A3C30);display:flex;align-items:center;justify-content:center;">
+          <div style="text-align:center;color:white;padding:22px;">
+            <div style="font-family:'Playfair Display',serif;font-size:22px;font-style:italic;line-height:1.5;">TOUCH<br>POEM FOR<br>A GROUP<br>OF PEOPLE</div>
+          </div>
+        </div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Digital Folk</div></div>
+      </div>
+      <div class="m-card" onclick="go('s-detail')" style="height:150px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#C8D8E8,#8898B8);font-size:40px;">🌊</div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Fluid Memory</div></div>
+      </div>
+      <div class="m-card" onclick="go('s-detail')" style="height:165px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#D0C0D8,#9080A8);font-size:40px;">✨</div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Ghost Layer</div></div>
+      </div>
+
+      <!-- col 3 -->
+      <div class="m-card" onclick="go('s-detail')" style="height:170px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#DDD0C0,#AE9070);font-size:40px;">🪨</div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Urban Decay</div></div>
+      </div>
+      <div class="m-card" onclick="go('s-detail')" style="height:230px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#688870,#405848);font-size:58px;">🌿</div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Archive Pull</div></div>
+      </div>
+      <div class="m-card" onclick="go('s-detail')" style="height:190px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#E8C8A0,#C09060);font-size:48px;">🍂</div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Solar Bloom</div></div>
+      </div>
+
+      <!-- col 4 -->
+      <div class="m-card" onclick="go('s-detail')" style="height:210px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#C0D0E4,#7888A8);font-size:46px;">🌀</div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Quiet Luxury</div></div>
+      </div>
+      <div class="m-card" onclick="go('s-detail')" style="height:165px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#A87888,#703050);font-size:40px;">🌙</div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Digital Folk</div></div>
+      </div>
+      <div class="m-card" onclick="go('s-detail')" style="height:220px;">
+        <div class="m-card-art" style="height:100%;background:linear-gradient(135deg,#B8B0C8,#7870A0);font-size:50px;">💎</div>
+        <div class="m-card-ovl"><div class="m-card-ovl-title">Ghost Layer</div></div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="color-wheel" title="Colour palette"></div>
+      <button class="tb-btn" title="Add">＋</button>
+      <button class="tb-btn" title="Edit">✏</button>
+      <button class="tb-btn" title="Voice" onclick="go('s-detail')">🎤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     S5 · CARD DETAIL
+══════════════════════════════ -->
+<div id="s-detail" class="screen">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sb-logo"></div>
+    <div class="sb-section">Collections</div>
+    <div class="sb-item on">Inspo</div>
+    <div class="sb-item">Collection AW</div>
+    <div class="sb-item">Collection SS</div>
+    <div class="sb-item">Accessories</div>
+    <div class="sb-add">+</div>
+    <div class="sb-thumbs">
+      <div class="sb-thumb sel"><div class="thumb-fill" style="background:linear-gradient(135deg,#9E8AAE,#C4A8C8);">🌸</div></div>
+      <div class="sb-thumb"><div class="thumb-fill" style="background:linear-gradient(135deg,#E8D870,#E0A030);">⚡</div></div>
+      <div class="sb-thumb"><div class="thumb-fill" style="background:linear-gradient(135deg,#A8C0A0,#608060);">🌿</div></div>
+      <div class="sb-thumb"><div class="thumb-fill" style="background:linear-gradient(135deg,#E0C0C0,#A88080);">💎</div></div>
+      <div class="sb-thumb"><div class="thumb-fill" style="background:linear-gradient(135deg,#C04040,#800010);">🍎</div></div>
+    </div>
+  </div>
+
+  <div class="detail-body">
+    <!-- Card image frame -->
+    <div class="detail-frame">
+      <div class="detail-inner">
+        <div class="granary-grid">
+          <div class="granary-cell">
+            <div class="gi">🌸</div>
+            <div class="gl">praying for a job<br>in fashion</div>
+          </div>
+          <div class="granary-cell">
+            <div class="gi">🌺</div>
+            <div class="gl">yearning for a job<br>in fashion</div>
+          </div>
+          <div class="granary-cell">
+            <div class="gi">💜</div>
+            <div class="gl">wishing for a job<br>in fashion</div>
+          </div>
+          <div class="granary-cell">
+            <div class="gi">🤍</div>
+            <div class="gl">hoping for a job<br>in fashion</div>
+          </div>
+        </div>
+        <div class="granary-sig">@1granary</div>
+      </div>
+    </div>
+
+    <!-- Note panel -->
+    <div class="detail-right">
+      <div class="detail-title">Orchid<br>Rhythm</div>
+      <div class="note-box">
+        <textarea class="note-area" id="note-area"
+          placeholder="I'm inspired..."
+          oninput="noteInput(this)"></textarea>
+        <div class="voice-row" id="voice-row">
+          <span>I'm inspired...</span>
+          <div class="wave">
+            <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+            <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+            <div class="wb"></div><div class="wb"></div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-toolbar">
+        <div class="color-wheel"></div>
+        <button class="tb-btn" style="background:rgba(255,255,255,.55);">＋</button>
+        <button class="tb-btn" style="background:rgba(255,255,255,.55);">✏</button>
+        <button class="tb-btn" style="background:rgba(255,255,255,.55);" onclick="go('s-search')">🎤</button>
+        <button class="btn-update" onclick="saveNote()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     S6 · SEARCH + SKETCH PANEL
+══════════════════════════════ -->
+<div id="s-search" class="screen">
+  <div class="srch-left">
+    <div class="srch-card-wrap">
+      <!-- Image frame -->
+      <div class="srch-frame">
+        <div class="srch-inner">
+          <div class="srch-granary-grid">
+            <div class="srch-cell"><div class="si">🌸</div><div class="sl">praying for a job in fashion</div></div>
+            <div class="srch-cell"><div class="si">🌺</div><div class="sl">yearning for a job in fashion</div></div>
+            <div class="srch-cell"><div class="si">💜</div><div class="sl">wishing for a job in fashion</div></div>
+            <div class="srch-cell"><div class="si">🤍</div><div class="sl">hoping for a job in fashion</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Text & sketches -->
+      <div class="srch-content">
+        <div class="srch-name">Orchid<br>Rhythm</div>
+        <p class="srch-body" id="srch-body">
+          I'm inspired by how diverse shapes and colours come together
+          in a harmonious whole. Its elegance emerges from the tension
+          between <span class="hl" onclick="searchFor('richness')">richness</span>
+          and <span class="hl" onclick="searchFor('restraint')">restraint</span>.
+          From this visual dialogue,
+          <span class="hl" onclick="searchFor('collection')">I can imagine an entire collection</span>.
+        </p>
+
+        <!-- Sketch thumbnails -->
+        <div class="sketch-row">
+          <div class="sk-thumb">
+            <div class="sk-fill" style="background:linear-gradient(135deg,#F0D0D8,#E0A0B0);">🌸</div>
+          </div>
+          <div class="sk-thumb">
+            <div class="sk-fill" style="background:linear-gradient(135deg,#E8E4F0,#C4C0E0);">✏️</div>
+          </div>
+          <div class="sk-thumb">
+            <div class="sk-fill" style="background:linear-gradient(135deg,#F0E8DC,#D8C0A0);">👗</div>
+          </div>
+        </div>
+
+        <div class="srch-bar-row">
+          <div class="color-wheel"></div>
+          <button class="tb-btn" style="background:rgba(255,255,255,.4);">＋</button>
+          <button class="tb-btn" style="background:rgba(255,255,255,.4);">✏</button>
+          <button class="tb-btn" style="background:rgba(255,255,255,.4);">🎤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search panel -->
+  <div class="srch-panel">
+    <div class="srch-input-wrap">
+      <span class="srch-icon">⌕</span>
+      <input class="srch-input" id="srch-input" type="text"
+        value="restraint" oninput="filterResults(this.value)" />
+    </div>
+
+    <div class="srch-results" id="srch-results">
+
+      <div class="r-card" onclick="selectR(this)">
+        <div class="r-thumb"><div class="r-fill" style="background:linear-gradient(135deg,#C0B0A0,#80706A);">👔</div></div>
+        <div>
+          <div class="r-title">Practicing Restraint to Build an Impactful Look</div>
+          <div class="r-desc">By reducing decorative elements and limiting colour, a single focal point gains far greater visual power.</div>
+        </div>
+      </div>
+
+      <div class="r-card on" onclick="selectR(this)">
+        <div class="r-thumb"><div class="r-fill" style="background:linear-gradient(135deg,#E0D0C0,#B09080);">🤍</div></div>
+        <div>
+          <div class="r-title">The Art of Restraint: Why Minimalism Became the New Language…</div>
+          <div class="r-desc">In streetwear, restraint manifests through reduced logos, allowing proportion and structure to communicate identity.</div>
+        </div>
+      </div>
+
+      <div class="r-card" onclick="selectR(this)">
+        <div class="r-thumb"><div class="r-fill" style="background:linear-gradient(135deg,#D0E0C0,#90A870);">✂️</div></div>
+        <div>
+          <div class="r-title">Fashion Creativity Must Be Restrained</div>
+          <div class="r-desc">Creative limitation—material constraints, sustainability rules, conceptual boundaries—becomes a generative catalyst.</div>
+        </div>
+      </div>
+
+      <div class="r-card" onclick="selectR(this); showCtx()">
+        <div class="r-thumb"><div class="r-fill" style="background:linear-gradient(135deg,#E0D8C8,#B0A890);">🧵</div></div>
+        <div>
+          <div class="r-title">Minimalism, Luxury and Restraint</div>
+          <div class="r-desc">True luxury emerges from deliberate absence and material refinement…</div>
+        </div>
+      </div>
+
+      <!-- Context menu -->
+      <div class="ctx-menu" id="ctx-menu" style="display:none;">
+        <div class="ctx-row" onclick="toggleSub()">Generate Sketch <span>›</span></div>
+        <div class="ctx-sub" id="ctx-sub">
+          <div class="ctx-row" onclick="pickStyle(this)">Frequently Used</div>
+          <div class="ctx-row" onclick="pickStyle(this)">Ink</div>
+          <div class="ctx-row on" onclick="pickStyle(this)">Watercolor ✓</div>
+          <div class="ctx-row" onclick="pickStyle(this)">Pencil</div>
+          <div class="ctx-row" onclick="pickStyle(this)">Pastel</div>
+          <div class="ctx-row" onclick="pickStyle(this)">Photo</div>
+          <div class="ctx-row" onclick="pickStyle(this)">+ New Style</div>
+        </div>
+        <div class="ctx-row" onclick="hideCtx()">Hide</div>
+        <div class="ctx-row" onclick="hideCtx()">Delete</div>
+        <div class="ctx-row">Make New <span>›</span></div>
+        <div class="ctx-row">Plugins <span>›</span></div>
+      </div>
+
+      <div class="r-card" onclick="selectR(this)">
+        <div class="r-thumb"><div class="r-fill" style="background:linear-gradient(135deg,#302828,#180808);">🪡</div></div>
+        <div>
+          <div class="r-title">Corset — Fashion as Physical Restraint</div>
+          <div class="r-desc">The corset's history reveals how fashion has shaped bodies, identities, and social roles through physical form.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     NAV PILLS
+══════════════════════════════ -->
+<div class="nav-label" id="nav-label"></div>
+<div class="nav-pills" id="nav-pills">
+  <div class="nav-pill on" onclick="go('s-poem')" title="Poem"></div>
+  <div class="nav-pill" onclick="go('s-questions')" title="Onboarding"></div>
+  <div class="nav-pill" onclick="go('s-cards')" title="Trend Cards"></div>
+  <div class="nav-pill" onclick="go('s-main')" title="Moodboard"></div>
+  <div class="nav-pill" onclick="go('s-detail')" title="Card Detail"></div>
+  <div class="nav-pill" onclick="go('s-search')" title="Search &amp; Sketch"></div>
+</div>
+
+<script>
+// ── Screen system
+const SCREENS = ['s-poem','s-questions','s-cards','s-main','s-detail','s-search'];
+const LABELS  = ['Poem','Onboarding','Trend Cards','Moodboard','Detail','Search'];
+let current = 0;
+
+function go(id){
+  SCREENS.forEach((s,i)=>{
+    const el = document.getElementById(s);
+    const pip = document.querySelectorAll('.nav-pill')[i];
+    if(s===id){
+      el.classList.add('active');
+      pip && pip.classList.add('on');
+      current = i;
+    } else {
+      el.classList.remove('active');
+      pip && pip.classList.remove('on');
+    }
+  });
+  const lbl = document.getElementById('nav-label');
+  lbl.textContent = LABELS[current];
+  setTimeout(()=>{ lbl.style.opacity='0'; }, 1400);
+  lbl.style.opacity='1';
+
+  const pills = document.getElementById('nav-pills');
+  pills.style.display = id==='s-poem' ? 'none' : 'flex';
+  lbl.style.display   = id==='s-poem' ? 'none' : 'block';
+}
+
+// ── Poem animation
+window.addEventListener('load',()=>{
+  document.querySelectorAll('.poem-line').forEach(l=>{
+    const d = parseInt(l.dataset.d)||0;
+    setTimeout(()=>l.classList.add('vis'), d);
+  });
+  setTimeout(()=> document.getElementById('poem-begin').classList.add('vis'), 7600);
+  document.getElementById('nav-pills').style.display='none';
+  document.getElementById('nav-label').style.display='none';
+});
+
+// ── Questions
+function pick(el, stepId){
+  document.querySelectorAll(`#${stepId} .q-opt`).forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function nextQ(n){
+  document.querySelectorAll('.q-step').forEach(s=>s.classList.remove('on'));
+  document.getElementById(`q${n}`).classList.add('on');
+}
+
+// ── Card rail dot tracking
+document.getElementById('tc-rail').addEventListener('scroll', function(){
+  const pct = this.scrollLeft / (this.scrollWidth - this.clientWidth);
+  const idx = Math.round(pct * 9);
+  document.querySelectorAll('.tc-dot').forEach((d,i)=>d.classList.toggle('on',i===idx));
+});
+
+// ── Note area
+function noteInput(el){
+  document.getElementById('voice-row').style.display = el.value ? 'none' : 'flex';
+}
+function saveNote(){
+  const txt = document.getElementById('note-area').value;
+  if(txt){
+    // inject highlighted version into search body
+    let h = txt
+      .replace(/richness/gi, '<span class="hl" onclick="searchFor(\'richness\')">richness</span>')
+      .replace(/restraint/gi,'<span class="hl" onclick="searchFor(\'restraint\')">restraint</span>')
+      .replace(/collection/gi,'<span class="hl" onclick="searchFor(\'collection\')">collection</span>');
+    document.getElementById('srch-body').innerHTML = h;
+  }
+  go('s-search');
+}
+
+// ── Search
+function searchFor(word){
+  document.getElementById('srch-input').value = word;
+}
+function filterResults(q){}
+
+function selectR(el){
+  document.querySelectorAll('.r-card').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+}
+function showCtx(){
+  document.getElementById('ctx-menu').style.display='block';
+}
+function hideCtx(){
+  document.getElementById('ctx-menu').style.display='none';
+}
+function toggleSub(){
+  const s = document.getElementById('ctx-sub');
+  s.style.display = s.style.display==='none' ? 'block' : 'none';
+}
+function pickStyle(el){
+  document.querySelectorAll('.ctx-sub .ctx-row').forEach(r=>r.classList.remove('on'));
+  el.classList.add('on');
+  const label = el.textContent.replace(' ✓','').trim();
+  el.textContent = label + ' ✓';
+  setTimeout(hideCtx, 400);
+}
+
+// ── Keyboard nav
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight' && current < SCREENS.length-1) go(SCREENS[current+1]);
+  if(e.key==='ArrowLeft'  && current > 0)                go(SCREENS[current-1]);
+});
+</script>
+</body>
+</html>
